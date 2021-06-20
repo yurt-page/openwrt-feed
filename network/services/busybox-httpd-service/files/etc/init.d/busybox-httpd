@@ -1,0 +1,47 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2007-2021 OpenWrt.org
+START=50
+USE_PROCD=1
+
+append_arg() {
+	local cfg="$1"
+	local var="$2"
+	local opt="$3"
+	local def="$4"
+	local val
+
+	config_get val "$cfg" "$var"
+	[ -n "$val" -o -n "$def" ] && procd_append_param command "$opt" "${val:-$def}"
+}
+
+start_instance()
+{
+	local cfg="$1"
+	local realm="$(uci_get system.@system[0].hostname)"
+	local enabled
+
+	config_get_bool enabled "$cfg" 'enabled' 1
+	[ $enabled -gt 0 ] || return
+
+	procd_open_instance
+	procd_set_param respawn
+	procd_set_param stderr 1
+	procd_set_param command /usr/sbin/httpd -f
+
+	append_arg "$cfg" home "-h"
+	append_arg "$cfg" realm "-r" "${realm:-OpenWrt}"
+	append_arg "$cfg" config "-c"
+	append_arg "$cfg" listen_http "-p"
+
+	procd_close_instance
+}
+
+service_triggers()
+{
+	procd_add_reload_trigger "busybox-httpd"
+}
+
+start_service() {
+	config_load busybox-httpd
+	config_foreach start_instance busybox-httpd
+}
