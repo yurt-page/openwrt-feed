@@ -1,15 +1,8 @@
-# Server configuration
 config busybox-httpd main
-
-	# HTTP listen address [-p [IP:]PORT]
-	option listen_http	0.0.0.0:80
-#	option listen_http	[::]:80
-
-	# Server document root [-h HOME]
+	option enabled	1
+	list listen_http	0.0.0.0:80
+	list listen_http	[::]:80
 	option home		/www
-
 	# Basic auth realm, defaults to local hostname [-r REALM]
-#	option realm	OpenWrt
-
-	# Configuration file in busybox httpd format [-c CONFFILE]
-#	option config	/etc/httpd.conf
+	option realm	''
+	option config	/etc/httpd.conf

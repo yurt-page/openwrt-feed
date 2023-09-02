@@ -8,25 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=busybox-httpd-service
-PKG_VERSION:=1.0.0
+PKG_VERSION:=1.1.0
 PKG_RELEASE:=1
-
 PKG_MAINTAINER:=Sergey Ponomarev <stokito@gmail.com>
 PKG_LICENSE:=ISC
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/busybox-httpd-service/default
+define Package/busybox-httpd-service
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
-  PKGARCH:=all
-endef
-
-define Package/busybox-httpd-service
-  $(Package/busybox-httpd-service/default)
   TITLE:=BusyBox HTTPd - basic HTTP server
-  DEPENDS:=@BUSYBOX_CONFIG_HTTPD @BUSYBOX_CONFIG_FEATURE_HTTPD_ETAG @BUSYBOX_CONFIG_FEATURE_HTTPD_CGI
+  DEPENDS:=@BUSYBOX_CONFIG_HTTPD
+  PKGARCH:=all
 endef
 
 define Package/busybox-httpd-service/description
@@ -34,7 +29,11 @@ define Package/busybox-httpd-service/description
 endef
 
 define Package/busybox-httpd-service/conffiles
+/etc/httpd.conf
 /etc/config/busybox-httpd
+endef
+
+define Build/Compile
 endef
 
 define Package/busybox-httpd-service/install
@@ -43,6 +42,9 @@ define Package/busybox-httpd-service/install
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/etc/config/busybox-httpd $(1)/etc/config/busybox-httpd
+
+	$(INSTALL_DIR) $(1)/etc/
+	$(INSTALL_CONF) ./files/etc/httpd.conf $(1)/etc/httpd.conf
 endef
 
 $(eval $(call BuildPackage,busybox-httpd-service))
