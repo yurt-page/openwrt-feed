@@ -18,7 +18,7 @@ start_instance()
 {
 	local cfg="$1"
 	local realm="$(uci_get system.@system[0].hostname)"
-	local listen http
+	local listen http config configs
 	local enabled
 
 	config_get_bool enabled "$cfg" 'enabled' 1
@@ -31,10 +31,17 @@ start_instance()
 
 	append_arg "$cfg" home "-h"
 	append_arg "$cfg" realm "-r" "${realm:-OpenWrt}"
-	append_arg "$cfg" config "-c"
 	config_get http "$cfg" listen_http
 	for listen in $http; do
 		procd_append_param command -p "$listen"
+	done
+	config_get configs "$cfg" config
+	for config in $configs; do
+		if [ -e $config ]; then
+			procd_append_param command -c "$config"
+		else
+			echo "Missing $config"
+		fi
 	done
 
 	procd_close_instance
@@ -46,6 +53,7 @@ service_triggers()
 }
 
 start_service() {
+	mkdir -p /var/run/busybox-httpd/
 	config_load busybox-httpd
 	config_foreach start_instance busybox-httpd
 }
